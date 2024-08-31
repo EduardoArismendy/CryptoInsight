@@ -1,0 +1,432 @@
+<html><head><base>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis de Criptomonedas</title>
+<style>
+    :root {
+      --primary-color: #42525d;
+      --secondary-color: #2c3e50;
+      --accent-color: #2b5147;
+      --text-color: #ecf0f1;
+      --positive-color: #2ecc71;
+      --negative-color: #e74c3c;
+      --neutral-color: #f39c12;
+      --select-bg: #34495e;
+      --select-hover: #2c3e50;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--primary-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: var(--secondary-color);
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 1px solid var(--accent-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-header img {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2, h3 {
+      margin-bottom: 15px;
+      color: var(--text-color);
+    }
+
+    ul {
+      list-style-type: none;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    button:hover {
+      background-color: #1e3a33;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    button.active {
+      background-color: #1e3a33;
+    }
+
+    button i {
+      margin-right: 8px;
+      font-size: 1.2em;
+    }
+
+    .chart-container {
+      height: 60vh;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .chart-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .chart-controls select, .chart-controls button {
+      padding: 10px 15px;
+      border-radius: 5px;
+      border: none;
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .chart-controls select:hover, .chart-controls button:hover {
+      background-color: #1e3a33;
+    }
+
+    .chart-controls select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    .analysis-container {
+      background-color: var(--secondary-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .analysis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .analysis-header h3 {
+      margin: 0;
+      color: var(--text-color);
+    }
+
+    .analysis-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    #analyzeButton, #toggleAnalysisButton {
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #analyzeButton:hover, #toggleAnalysisButton:hover {
+      background-color: #1e3a33;
+    }
+
+    #analyzeButton i, #toggleAnalysisButton i {
+      margin-right: 8px;
+    }
+
+    #analysisResult {
+      background-color: var(--primary-color);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .recommendation {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .long {
+      color: var(--positive-color);
+    }
+
+    .short {
+      color: var(--negative-color);
+    }
+
+    .neutral {
+      color: var(--neutral-color);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: auto;
+      }
+      
+      .chart-container {
+        height: 50vh;
+      }
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://raw.githubusercontent.com/EduardoArismendy/EduardoArismendy.github.io/9a7add5919731bdc6041a1b9737dc2ad4f70d8c6/hero2.png" alt="Logo de criptomonedas" width="50" height="50">
+      <h3>Criptomonedas</h3>
+    </div>
+    <ul>
+      <li><button onclick="updateInstrument('BTCUSD')"><i class="fab fa-bitcoin"></i>BTC/USD</button></li>
+      <li><button onclick="updateInstrument('ETHUSD')"><i class="fab fa-ethereum"></i>ETH/USD</button></li>
+      <li><button onclick="updateInstrument('XRPUSD')"><i class="fas fa-coins"></i>XRP/USD</button></li>
+      <li><button onclick="updateInstrument('LTCUSD')"><i class="fab fa-litecoin-ltc"></i>LTC/USD</button></li>
+      <li><button onclick="updateInstrument('ADAUSD')"><i class="fas fa-project-diagram"></i>ADA/USD</button></li>
+      <li><button onclick="updateInstrument('DOGEUSD')"><i class="fas fa-dog"></i>DOGE/USD</button></li>
+      <li><button onclick="updateInstrument('DOTUSD')"><i class="fas fa-dot-circle"></i>DOT/USD</button></li>
+      <li><button onclick="updateInstrument('LINKUSD')"><i class="fas fa-link"></i>LINK/USD</button></li>
+      <li><button onclick="updateInstrument('UNIUSD')"><i class="fas fa-unicorn"></i>UNI/USD</button></li>
+      <li><button onclick="updateInstrument('SOLUSD')"><i class="fas fa-sun"></i>SOL/USD</button></li>
+    </ul>
+  </div>
+  <div class="main-content">
+    <div class="chart-controls">
+      <select id="timeframeSelector" onchange="updateTimeframe()">
+        <option value="1">1 minuto</option>
+        <option value="5">5 minutos</option>
+        <option value="15">15 minutos</option>
+        <option value="30">30 minutos</option>
+        <option value="60">1 hora</option>
+        <option value="D">Diario</option>
+        <option value="W">Semanal</option>
+      </select>
+      <select id="indicatorSelector" onchange="addIndicator()">
+        <option value="">Seleccionar Indicador</option>
+        <option value="MASimple@tv-basicstudies">Media Móvil Simple</option>
+        <option value="MAExp@tv-basicstudies">Media Móvil Exponencial</option>
+        <option value="RSI@tv-basicstudies">RSI</option>
+        <option value="MACD@tv-basicstudies">MACD</option>
+        <option value="BB@tv-basicstudies">Bandas de Bollinger</option>
+        <option value="IchimokuCloud@tv-basicstudies">Ichimoku Cloud</option>
+        <option value="StochasticRSI@tv-basicstudies">Stochastic RSI</option>
+        <option value="ADX@tv-basicstudies">ADX</option>
+        <option value="CCI@tv-basicstudies">CCI</option>
+        <option value="ATR@tv-basicstudies">ATR</option>
+      </select>
+    </div>
+    <div id="tradingview_widget" class="chart-container"></div>
+    <div class="analysis-container">
+      <div class="analysis-header">
+        <h3>Análisis Técnico</h3>
+        <div class="analysis-buttons">
+          <button id="analyzeButton" onclick="performAnalysis()">
+            <i class="fas fa-chart-line"></i>Analizar
+          </button>
+          <button id="toggleAnalysisButton" onclick="toggleAnalysis()">
+            <i class="fas fa-eye"></i><span>Ocultar Análisis</span>
+          </button>
+        </div>
+      </div>
+      <div id="analysisResult"></div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script type="text/javascript">
+let widget;
+let currentSymbol = 'BTCUSD';
+let currentTimeframe = '60';
+let currentIndicators = [];
+let isAnalysisVisible = true;
+
+function createWidget() {
+  if (widget) {
+    widget.remove();
+  }
+  
+  widget = new TradingView.widget({
+    "width": "100%",
+    "height": "100%",
+    "symbol": "BINANCE:" + currentSymbol,
+    "interval": currentTimeframe,
+    "timezone": "Etc/UTC",
+    "theme": "dark",
+    "style": "1",
+    "locale": "es",
+    "toolbar_bg": "#f1f3f6",
+    "enable_publishing": false,
+    "allow_symbol_change": true,
+    "container_id": "tradingview_widget",
+    "studies": currentIndicators
+  });
+}
+
+function updateInstrument(symbol) {
+  currentSymbol = symbol;
+  createWidget();
+  
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach(button => button.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function updateTimeframe() {
+  currentTimeframe = document.getElementById('timeframeSelector').value;
+  createWidget();
+}
+
+function addIndicator() {
+  const indicator = document.getElementById('indicatorSelector').value;
+  if (indicator && !currentIndicators.includes(indicator)) {
+    currentIndicators.push(indicator);
+    createWidget();
+  }
+}
+
+function performAnalysis() {
+  const analysisResult = document.getElementById('analysisResult');
+  analysisResult.innerHTML = '<p>Analizando ' + currentSymbol + ' en el marco de tiempo ' + currentTimeframe + '...</p>';
+  
+  setTimeout(() => {
+    const randomValue = Math.random();
+    let recommendation, explanation;
+    
+    if (randomValue < 0.4) {
+      recommendation = '<p class="recommendation long">Recomendación: LONG</p>';
+      explanation = 'El análisis técnico sugiere una tendencia alcista. Los indicadores muestran señales de compra.';
+    } else if (randomValue < 0.8) {
+      recommendation = '<p class="recommendation short">Recomendación: SHORT</p>';
+      explanation = 'El análisis técnico indica una posible tendencia bajista. Los indicadores muestran señales de venta.';
+    } else {
+      recommendation = '<p class="recommendation neutral">Recomendación: NEUTRAL</p>';
+      explanation = 'El análisis técnico no muestra una tendencia clara. Se recomienda esperar por señales más fuertes.';
+    }
+    
+    analysisResult.innerHTML = `
+      <h4>Resultado del Análisis para ${currentSymbol}</h4>
+      <p>Timeframe: ${currentTimeframe}</p>
+      ${recommendation}
+      <p>${explanation}</p>
+      <p>Recuerde que este análisis es generado automáticamente y no debe ser considerado como asesoramiento financiero. Siempre realice su propia investigación antes de tomar decisiones de inversión.</p>
+    `;
+  }, 2000);
+}
+
+function toggleAnalysis() {
+  const analysisResult = document.getElementById('analysisResult');
+  const toggleButton = document.getElementById('toggleAnalysisButton');
+  const toggleButtonText = toggleButton.querySelector('span');
+  const toggleButtonIcon = toggleButton.querySelector('i');
+  
+  if (isAnalysisVisible) {
+    analysisResult.style.display = 'none';
+    toggleButtonText.textContent = 'Mostrar Análisis';
+    toggleButtonIcon.classList.remove('fa-eye');
+    toggleButtonIcon.classList.add('fa-eye-slash');
+  } else {
+    analysisResult.style.display = 'block';
+    toggleButtonText.textContent = 'Ocultar Análisis';
+    toggleButtonIcon.classList.remove('fa-eye-slash');
+    toggleButtonIcon.classList.add('fa-eye');
+  }
+  
+  isAnalysisVisible = !isAnalysisVisible;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  createWidget();
+  document.querySelector('button').classList.add('active');
+  document.getElementById('timeframeSelector').value = currentTimeframe;
+});
+
+function saveSelections() {
+  localStorage.setItem('currentSymbol', currentSymbol);
+  localStorage.setItem('currentTimeframe', currentTimeframe);
+  localStorage.setItem('currentIndicators', JSON.stringify(currentIndicators));
+}
+
+function loadSelections() {
+  currentSymbol = localStorage.getItem('currentSymbol') || 'BTCUSD';
+  currentTimeframe = localStorage.getItem('currentTimeframe') || '60';
+  currentIndicators = JSON.parse(localStorage.getItem('currentIndicators')) || [];
+  
+  document.querySelector(`button[onclick="updateInstrument('${currentSymbol}')"]`).classList.add('active');
+  document.getElementById('timeframeSelector').value = currentTimeframe;
+  createWidget();
+}
+
+document.addEventListener('DOMContentLoaded', loadSelections);
+
+['updateInstrument', 'updateTimeframe', 'addIndicator'].forEach(funcName => {
+  const originalFunc = window[funcName];
+  window[funcName] = function() {
+    originalFunc.apply(this, arguments);
+    saveSelections();
+  };
+});
+</script>
+</body></html>
